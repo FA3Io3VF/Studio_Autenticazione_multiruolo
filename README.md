@@ -313,3 +313,60 @@ class RouteRoleAssociation(Base):
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 ```
+
+## Terza analisi del problema
+
+```python
+
+# Definizione della tabella di associazione tra utenti e ruoli
+user_roles = Table(
+    'user_roles', 
+    Base.metadata,
+    Column('user_id', Integer, ForeignKey('users.id')),
+    Column('role_id', Integer, ForeignKey('roles.id'))
+)
+
+# Definizione della tabella di associazione tra ruoli e rotte
+role_routes = Table(
+    'role_routes',
+    Base.metadata,
+    Column('role_id', Integer, ForeignKey('roles.id')),
+    Column('route_id', Integer, ForeignKey('routes.id'))
+)
+
+# Definizione della tabella di associazione tra utenti e rotte
+user_routes = Table(
+    'user_routes',
+    Base.metadata,
+    Column('user_id', Integer, ForeignKey('users.id')),
+    Column('route_id', Integer, ForeignKey('routes.id'))
+)
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    name = Column(String, index=True)
+    email = Column(String, unique=True, index=True)
+    loginUsername = Column(String(50), unique=True, index=True)
+    password = Column(String, nullable=False)
+    roles = relationship('Role', secondary=user_roles, back_populates='users')
+    routes = relationship('Route', secondary=user_routes, back_populates='users')
+
+
+class Role(Base):
+    __tablename__ = 'roles'
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True, unique=True)
+    users = relationship('User', secondary=user_roles, back_populates='roles')
+    routes = relationship('Route', secondary=role_routes, back_populates='roles')
+
+class Route(Base):
+    __tablename__ = 'routes'
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True) #id univoco della rotta
+    name = Column(String, index=True, unique=True) #Nome della rotta
+    path = Column(String, unique=True) #percorso relativo della rotta ad esempio /rotta1/sottoRotta1
+    note = Column(String) #note opzionali relative alla rotta
+    active = Column(Boolean=True) #indica se la rotta è attiva
+    roles = relationship('Role', secondary=role_routes, back_populates='routes')
+    users = relationship('User', secondary=user_routes, back_populates='routes')
+ ```
