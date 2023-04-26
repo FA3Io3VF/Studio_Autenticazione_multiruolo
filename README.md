@@ -144,7 +144,7 @@ che potrà essere popolato fino a diventare qualcosa del genere:
 ```
 
 
-## Prima analisi:
+## Prima analisi - soluzione non completa e banale:
 
 ```python
 # Tabella degli utenti
